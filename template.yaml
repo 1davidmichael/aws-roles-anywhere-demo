@@ -1,0 +1,64 @@
+Resources:
+  TestBucket:
+    Type: AWS::S3::Bucket
+
+  IAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - "rolesanywhere.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+              - "sts:SetSourceIdentity"
+              - "sts:TagSession"
+      Policies:
+        - PolicyName: S3Access
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: "s3:*"
+                Resource:
+                  - !Sub ${TestBucket.Arn}/*
+                  - !GetAtt TestBucket.Arn
+
+  TrustAnchor:
+    Type: AWS::RolesAnywhere::TrustAnchor
+    Properties:
+      Enabled: True
+      Name: aws-iam-roles-anywhere
+      Source:
+        SourceType: "CERTIFICATE_BUNDLE"
+        SourceData:
+          X509CertificateData: |
+            -----BEGIN CERTIFICATE-----
+            MIIBhTCCASugAwIBAgIQXrejc7+GopZxDmVFKUVZbzAKBggqhkjOPQQDAjAhMR8w
+            HQYDVQQDExZEYXZpZCAgTWljaGFlbCBSb290IENBMB4XDTIyMDcxNTE5NTAzMFoX
+            DTMyMDcxMjE5NTAzMFowITEfMB0GA1UEAxMWRGF2aWQgIE1pY2hhZWwgUm9vdCBD
+            QTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABGDQu7EUC9xLtqpjTSdVyqypwLL0
+            s+ZcRc2v6YEyNPbgbQ5Oj4f5RFWKOZrylw/YarGmC1UpmAeLfGrhnzxwgzKjRTBD
+            MA4GA1UdDwEB/wQEAwIBBjASBgNVHRMBAf8ECDAGAQH/AgEBMB0GA1UdDgQWBBTB
+            ULZ1XftSIS9T1wUPGnvrG8ehxTAKBggqhkjOPQQDAgNIADBFAiBCo+ck6G6NpRov
+            nhQugK/VgCt0fSoeM1YBlHBWOhdSKwIhANODxe0vjvLcGLYIgmCrzENpx0Mn9diT
+            0XOvvsl+FLqA
+            -----END CERTIFICATE-----
+  Profile:
+    Type: AWS::RolesAnywhere::Profile
+    Properties:
+      DurationSeconds: 3600
+      Name: aws-iam-roles-anywhere-poc
+      RoleArns:
+        - !GetAtt IAMRole.Arn
+
+Outputs:
+  BucketName:
+    Value: !Ref TestBucket
+  TrustAnchorArn:
+    Value: !GetAtt TrustAnchor.TrustAnchorArn
+  ProfileArn:
+    Value: !GetAtt Profile.ProfileArn
