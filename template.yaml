@@ -1,6 +1,11 @@
 Resources:
   TestBucket:
     Type: AWS::S3::Bucket
+    Properties:
++       BucketEncryption:
++           ServerSideEncryptionConfiguration:
++               - ServerSideEncryptionByDefault:
++                   SSEAlgorithm: AES256
 
   IAMRole:
     Type: AWS::IAM::Role
