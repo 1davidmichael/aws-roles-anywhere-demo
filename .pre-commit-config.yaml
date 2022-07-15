@@ -2,3 +2,8 @@
   rev: '2.1.56' # change to tag or sha
   hooks:
     - id: checkov
+- repo: https://github.com/awslabs/cfn-python-lint
+  rev: v0.15.0 # The version of cfn-lint to use
+    hooks:
+    - id: cfn-python-lint
+      files: template.yaml
